@@ -12,3 +12,22 @@ message Location {
   Position end = 3;
   repeated string lines = 4;
 }
+
+enum Op {
+  Plus = 0;
+  Minus = 1;
+}
+
+message Expr {
+  oneof expr_value {
+    string var = 1;
+    uint32 lit = 2;
+    BinOp bin_op = 3;
+  }
+}
+
+message BinOp {
+  Expr lhs = 1;
+  Op op = 2;
+  Expr rhs = 3;
+}  
