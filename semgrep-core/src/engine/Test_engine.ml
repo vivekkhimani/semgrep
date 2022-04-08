@@ -165,7 +165,8 @@ let make_tests ?(unit_testing = false) xs =
                try
                  Match_rules.check
                    ~match_hook:(fun _ _ _ -> ())
-                   ~timeout:0. ~timeout_threshold:0 (config, []) rules xtarget
+                   ~timeout:0. ~timeout_threshold:0 ~max_memory_mb:0
+                   (config, []) rules xtarget
                with
                | exn ->
                    failwith

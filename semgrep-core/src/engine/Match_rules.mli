@@ -12,6 +12,7 @@ val check :
     (string -> Metavariable.bindings -> Parse_info.t list Lazy.t -> unit) ->
   timeout:float ->
   timeout_threshold:int ->
+  max_memory_mb:int ->
   Config_semgrep.t * Equivalence.equivalences ->
   Rule.rules ->
   Xtarget.t ->

@@ -293,26 +293,24 @@ let iter_targets_and_get_matches_and_exn_to_errors config f targets =
          let res, run_time =
            Common.with_time (fun () ->
                try
-                 Memory_limit.run_with_memory_limit
-                   ~mem_limit_mb:config.max_memory_mb (fun () ->
-                     (* we used to call timeout_function() here, but this
-                      * is now done in Match_rules because we now
-                      * timeout per rule, not per file since semgrep-python
-                      * pass all the rules to semgrep-core.
-                      *
-                      * old: timeout_function file config.timeout ...
-                      *)
-                     f target |> fun v ->
-                     (* This is just to test -max_memory, to give a chance
-                      * to Gc.create_alarm to run even if the program does
-                      * not even need to run the Gc. However, this has a
-                      * slow perf penality on small programs, which is why
-                      * it's better to keep guarded when you're
-                      * not testing -max_memory.
-                      *)
-                     if config.test then Gc.full_major ();
-                     logger#trace "done with %s" file;
-                     v)
+                 (* we used to call timeout_function() here, but this
+                  * is now done in Match_rules because we now
+                  * timeout per rule, not per file since semgrep-python
+                  * pass all the rules to semgrep-core.
+                  *
+                  * old: timeout_function file config.timeout ...
+                  *)
+                 f target |> fun v ->
+                 (* This is just to test -max_memory, to give a chance
+                  * to Gc.create_alarm to run even if the program does
+                  * not even need to run the Gc. However, this has a
+                  * slow perf penality on small programs, which is why
+                  * it's better to keep guarded when you're
+                  * not testing -max_memory.
+                  *)
+                 if config.test then Gc.full_major ();
+                 logger#trace "done with %s" file;
+                 v
                with
                (* note that Semgrep_error_code.exn_to_error already handles
                 * Timeout and would generate a TimeoutError code for it,
@@ -493,6 +491,7 @@ let semgrep_with_rules config ((rules, invalid_rules), rules_parse_time) =
            let res =
              Match_rules.check ~match_hook ~timeout:config.timeout
                ~timeout_threshold:config.timeout_threshold
+               ~max_memory_mb:config.max_memory_mb
                ( Config_semgrep.default_config,
                  parse_equivalences config.equivalences_file )
                rules xtarget

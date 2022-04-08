@@ -75,7 +75,8 @@ let skipped_target_of_rule (file_and_more : Xtarget.t) (rule : R.rule) :
 (* Entry point *)
 (*****************************************************************************)
 
-let check ~match_hook ~timeout ~timeout_threshold default_config rules xtarget =
+let check ~match_hook ~timeout ~timeout_threshold ~max_memory_mb default_config
+    rules xtarget =
   let { Xtarget.file; lazy_content; lazy_ast_and_errors; _ } = xtarget in
   logger#trace "checking %s with %d rules" file (List.length rules);
   if !Common.profile = Common.ProfAll then (
@@ -87,60 +88,64 @@ let check ~match_hook ~timeout ~timeout_threshold default_config rules xtarget =
   let res_rules, skipped_rules =
     rules
     |> Common.partition_either (fun r ->
-           let relevant_rule =
-             if !Flag_semgrep.filter_irrelevant_rules then (
-               match Analyze_rule.regexp_prefilter_of_rule r with
-               | None -> true
-               | Some (re, f) ->
-                   let content = Lazy.force lazy_content in
-                   logger#trace "looking for %s in %s" re file;
-                   f content)
-             else true
-           in
-           if not relevant_rule then (
-             logger#trace "skipping rule %s for %s" (fst r.R.id) file;
-             Right r)
-           else
-             let rule_id = fst r.R.id in
-             Rule.last_matched_rule := Some rule_id;
-             Common.profile_code (spf "real_rule:%s" rule_id) (fun () ->
-                 let match_result =
-                   timeout_function r file timeout (fun () ->
-                       (* dispatching *)
-                       match r.R.mode with
-                       | Search pformula ->
-                           Match_search_rules.check_rule r match_hook
-                             default_config pformula xtarget
-                       | Taint taint_spec ->
-                           (* TODO: 'debug_taint' should just be part of 'res'
-                            * (i.e., add a "debugging" field to 'Report.match_result'). *)
-                           let res, _TODO_debug_taint =
-                             Match_tainting_rules.check_rule r match_hook
-                               default_config taint_spec xtarget
-                           in
-                           res)
-                 in
-                 match match_result with
-                 | Some res -> Left res
-                 (* Note that because we now parse lazily a file, this rule timeout
-                  * can actually correspond to a parsing file timeout. *)
-                 | None ->
-                     incr cnt_timeout;
-                     if
-                       timeout_threshold > 0
-                       && !cnt_timeout >= timeout_threshold
-                     then raise File_timeout;
-                     let loc = Parse_info.first_loc_of_file file in
-                     Left
-                       {
-                         RP.matches = [];
-                         errors =
-                           [
-                             E.mk_error ~rule_id:(Some rule_id) loc "" E.Timeout;
-                           ];
-                         skipped_targets = [];
-                         profiling = RP.empty_rule_profiling r;
-                       }))
+           let context = spf "rule: %s target: %s" (fst r.Rule.id) file in
+           Memory_limit.run_with_memory_limit ~context
+             ~mem_limit_mb:max_memory_mb (fun () ->
+               let relevant_rule =
+                 if !Flag_semgrep.filter_irrelevant_rules then (
+                   match Analyze_rule.regexp_prefilter_of_rule r with
+                   | None -> true
+                   | Some (re, f) ->
+                       let content = Lazy.force lazy_content in
+                       logger#trace "looking for %s in %s" re file;
+                       f content)
+                 else true
+               in
+               if not relevant_rule then (
+                 logger#trace "skipping rule %s for %s" (fst r.R.id) file;
+                 Right r)
+               else
+                 let rule_id = fst r.R.id in
+                 Rule.last_matched_rule := Some rule_id;
+                 Common.profile_code (spf "real_rule:%s" rule_id) (fun () ->
+                     let match_result =
+                       timeout_function r file timeout (fun () ->
+                           (* dispatching *)
+                           match r.R.mode with
+                           | Search pformula ->
+                               Match_search_rules.check_rule r match_hook
+                                 default_config pformula xtarget
+                           | Taint taint_spec ->
+                               (* TODO: 'debug_taint' should just be part of 'res'
+                                * (i.e., add a "debugging" field to 'Report.match_result'). *)
+                               let res, _TODO_debug_taint =
+                                 Match_tainting_rules.check_rule r match_hook
+                                   default_config taint_spec xtarget
+                               in
+                               res)
+                     in
+                     match match_result with
+                     | Some res -> Left res
+                     (* Note that because we now parse lazily a file, this rule timeout
+                      * can actually correspond to a parsing file timeout. *)
+                     | None ->
+                         incr cnt_timeout;
+                         if
+                           timeout_threshold > 0
+                           && !cnt_timeout >= timeout_threshold
+                         then raise File_timeout;
+                         let loc = Parse_info.first_loc_of_file file in
+                         Left
+                           {
+                             RP.matches = [];
+                             errors =
+                               [
+                                 E.mk_error ~rule_id:(Some rule_id) loc ""
+                                   E.Timeout;
+                               ];
+                             skipped_targets = [];
+                             profiling = RP.empty_rule_profiling r;
+                           })))
   in
   let skipped = Common.map (skipped_target_of_rule xtarget) skipped_rules in
   let res = RP.collate_rule_results xtarget.Xtarget.file res_rules in

@@ -18,7 +18,8 @@ let default_heap_warning_mb = 400
    for detailed explanations.
 
 *)
-let run_with_memory_limit ?(stack_warning_kb = default_stack_warning_kb)
+let run_with_memory_limit ?(context = "-")
+    ?(stack_warning_kb = default_stack_warning_kb)
     ?(heap_warning_mb = default_heap_warning_mb) ~mem_limit_mb f =
   if stack_warning_kb < 0 then
     invalid_arg
@@ -49,14 +50,14 @@ let run_with_memory_limit ?(stack_warning_kb = default_stack_warning_kb)
     let mem_bytes = heap_bytes + stack_bytes in
     if mem_limit > 0 && mem_bytes > mem_limit then (
       logger#info
-        "exceeded heap+stack memory limit: %d bytes (stack=%d, heap=%d)"
-        mem_bytes stack_bytes heap_bytes;
+        "[%s] exceeded heap+stack memory limit: %d bytes (stack=%d, heap=%d)"
+        context mem_bytes stack_bytes heap_bytes;
       raise (ExceededMemoryLimit "Exceeded memory limit"))
     else if !heap_warning > 0 && heap_bytes > !heap_warning then (
       logger#warning
-        "large heap size: %d MiB (memory limit is %d MiB). If a crash follows, \
-         you could suspect OOM."
-        (heap_bytes / mb) mem_limit_mb;
+        "[%s] large heap size: %d MiB (memory limit is %d MiB). If a crash \
+         follows, you could suspect OOM."
+        context (heap_bytes / mb) mem_limit_mb;
       heap_warning := max (2 * !heap_warning) !heap_warning)
     else if
       stack_warning > 0
@@ -64,11 +65,11 @@ let run_with_memory_limit ?(stack_warning_kb = default_stack_warning_kb)
       && not !stack_already_warned
     then (
       logger#warning
-        "large stack size: %d bytes. If a crash follows, you should suspect a \
-         stack overflow. Make sure the maximum stack size is set to \
+        "[%s] large stack size: %d bytes. If a crash follows, you should \
+         suspect a stack overflow. Make sure the maximum stack size is set to \
          'unlimited' or to a value greater than %d bytes so as to obtain an \
          exception rather than a segfault."
-        stack_bytes mem_limit;
+        context stack_bytes mem_limit;
       stack_already_warned := true)
   in
   let alarm = Gc.create_alarm limit_memory in
