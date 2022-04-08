@@ -75,6 +75,16 @@ let skipped_target_of_rule (file_and_more : Xtarget.t) (rule : R.rule) :
 (* Entry point *)
 (*****************************************************************************)
 
+let _oom () =
+  let rec alloc i acc =
+    if 1 = 1 then
+      alloc (i + 1) (Array.init (max (10 * i) 1) (fun j -> i + j) :: acc)
+    else acc
+  in
+  alloc 0 []
+  |> List.fold_left (fun acc arr -> acc + Array.length arr) 0
+  |> prerr_int
+
 let check ~match_hook ~timeout ~timeout_threshold ~max_memory_mb default_config
     rules xtarget =
   let { Xtarget.file; lazy_content; lazy_ast_and_errors; _ } = xtarget in
