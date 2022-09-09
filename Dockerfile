@@ -23,7 +23,7 @@
 # - https://github.com/Homebrew/homebrew-core/blob/master/Formula/semgrep.rb
 # Note that many .github/workflows/ use returntocorp/ocaml:alpine, which should
 # be the latest, but may differ from this one.
-FROM returntocorp/ocaml:alpine-2022-06-09@sha256:99b453a838c9d94414991c0fd7be4711aa1bcc120f576e0f0653c7b921ea9718 as semgrep-core
+FROM returntocorp/ocaml:alpine-2022-06-30@sha256:ad21cce41ff72d87f613e34b48324248c697a5491d7a62d7cab8a1cc3e281c76 as semgrep-core
 
 USER root
 # Here is why we need those apk packages:
