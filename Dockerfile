@@ -87,7 +87,7 @@ RUN opam exec -- make minimal-build &&\
 # We change container, bringing the 'semgrep-core' binary with us.
 #
 
-FROM python:3.10-alpine AS semgrep-cli
+FROM python:3.11-alpine AS semgrep-cli
 
 WORKDIR /semgrep
 
