@@ -54,7 +54,7 @@
 #
 # Note that some .github/workflows/ use returntocorp/ocaml:alpine, which should
 # be the latest, but may differ from this one.
-FROM returntocorp/ocaml:alpine-2022-09-24 as semgrep-core-container
+FROM returntocorp/ocaml:alpine-2022-09-29 as semgrep-core-container
 
 WORKDIR /src/semgrep
 COPY . .
