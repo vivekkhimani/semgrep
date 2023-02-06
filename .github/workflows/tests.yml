@@ -78,7 +78,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: docker/setup-buildx-action@v2
-      - uses: docker/build-push-action@v3
+      - uses: docker/build-push-action@v4
         with:
           load: true
           tags: candidate-image
@@ -108,7 +108,7 @@ jobs:
             type=edge
 
       - name: Push image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         if: github.ref == 'refs/heads/develop' || (github.actor != 'dependabot[bot]' && !(github.event.pull_request.head.repo.full_name != github.repository))
         with:
           push: true
@@ -135,7 +135,7 @@ jobs:
       # adding some utilities. This image is meant for internal uses
       # such as benchmarks.
       - name: Push dev image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         if: github.ref == 'refs/heads/develop'
         with:
           push: true
