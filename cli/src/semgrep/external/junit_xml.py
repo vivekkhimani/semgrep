@@ -3,7 +3,6 @@ import collections
 import re
 import sys
 import xml.dom.minidom  # nosem: python.lang.security.use-defused-xml.use-defused-xml
-import xml.etree.ElementTree as ET  # nosem: python.lang.security.use-defused-xml.use-defused-xml
 
 """
 This file is copied from: https://github.com/kyrus/python-junit-xml/blob/master/junit_xml/__init__.py
