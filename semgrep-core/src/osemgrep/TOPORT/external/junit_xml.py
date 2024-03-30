@@ -2,7 +2,7 @@
 import collections
 import re
 import sys
-import xml.dom.minidom  # nosem: python.lang.security.use-defused-xml.use-defused-xml
+import defusedxml.minidom
 
 """
 This file is copied from: https://github.com/kyrus/python-junit-xml/blob/master/junit_xml/__init__.py
@@ -265,7 +265,7 @@ def to_xml_report_string(test_suites, prettyprint=True):
     if prettyprint:
         xml_string = xml_string.encode("utf-8")
         # fmt: off
-        xml_string = xml.dom.minidom.parseString(xml_string)  # nosem: contrib.dlint.dlint-equivalent.insecure-xml-use
+        xml_string = defusedxml.minidom.parseString(xml_string)  # nosem: contrib.dlint.dlint-equivalent.insecure-xml-use
         # fmt: on
         xml_string = xml_string.toprettyxml()
     return xml_string
