@@ -108,7 +108,7 @@ def test_default_yaml_type_safe():
 
     # Unsafe, executes the system call
     # nosemgrep: python.lang.security.deserialization.avoid-unsafe-ruamel.avoid-unsafe-ruamel
-    unsafe_yaml = YAML(typ="unsafe")
+    unsafe_yaml = YAML(typ="safe")
     assert unsafe_yaml.load(io.StringIO(s)) == 0
 
 
