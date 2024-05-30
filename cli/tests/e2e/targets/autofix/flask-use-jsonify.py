@@ -7,7 +7,7 @@ app = flask.Flask(__name__)
 def user():
     user_dict = get_user(request.args.get("id"))
     # ruleid:use-jsonify
-    return json.dumps(user_dict)
+    return (json.dumps(user_dict), {'Content-Type': 'application/json'})
 
 from json import dumps
 
