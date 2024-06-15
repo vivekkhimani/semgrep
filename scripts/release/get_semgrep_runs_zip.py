@@ -3,7 +3,7 @@ from typing import Any
 from typing import Mapping
 
 import click
-import requests
+from security import safe_requests
 
 API_ROOT = "https://api.github.com/repos/returntocorp/semgrep-rules"
 ACCEPT = "application/vnd.github.v3+json"
@@ -20,7 +20,7 @@ def err(content: str, **kwargs: Any) -> None:
 
 
 def _gh_get(path: str) -> JsonObject:
-    r = requests.get(f"{API_ROOT}/{path}", headers=HEADERS, timeout=TIMEOUT)
+    r = safe_requests.get(f"{API_ROOT}/{path}", headers=HEADERS, timeout=TIMEOUT)
     r.raise_for_status()
     return r.json()
 
@@ -44,8 +44,7 @@ def _get_artifact_url(run_id: int) -> str:
 
 
 def _get_runs_artifact(url: str, access_token: str) -> None:
-    res = requests.get(
-        url, headers={"Authorization": f"bearer {access_token}"}, timeout=30
+    res = safe_requests.get(url, headers={"Authorization": f"bearer {access_token}"}, timeout=30
     )
     res.raise_for_status()
     with open(ZIP_LOC, "wb") as fd:

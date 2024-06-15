@@ -15,6 +15,7 @@ from attrs import field
 from ruamel.yaml import YAML
 
 from semgrep.state import get_state
+from security import safe_requests
 
 
 logger = logging.getLogger(__file__)
@@ -41,8 +42,7 @@ class RuleConfig:
     def _fetch_rule_config_from_url(self, rule_config_url: str) -> Optional[str]:
         logger.info(f"Fetching config from '{rule_config_url}'")
         try:
-            r = requests.get(
-                rule_config_url, headers={"User-Agent": "perf.config"}, timeout=60
+            r = safe_requests.get(rule_config_url, headers={"User-Agent": "perf.config"}, timeout=60
             )
             r.raise_for_status()
         except requests.Timeout:

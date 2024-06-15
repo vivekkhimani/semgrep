@@ -1,4 +1,5 @@
 import requests
+from security import safe_requests
 
 url = "www.github.com"
 
@@ -18,10 +19,10 @@ def return_url():
 r = requests.request("GET", return_url())
 
 # ok
-r = requests.get(url, timeout=50)
+r = safe_requests.get(url, timeout=50)
 
 def from_import_test1(url):
-    from requests import get, post
+    from security.safe_requests import get, post
     # ok
     r = get(url, timeout=3)
 
@@ -32,7 +33,6 @@ def test2():
     """Perform a requests.get and default headers set"""
     headers = {**_get_default_headers(), **headers}
     # ok
-    r = requests.get(
-        url, headers=headers, params=params, **{"timeout": TIMEOUT, **kwargs}
+    r = safe_requests.get(url, headers=headers, params=params, **{"timeout": TIMEOUT, **kwargs}
     )
     return r
