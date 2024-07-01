@@ -7,6 +7,7 @@ from typing import Optional
 
 import pytest
 from tests.semgrep_runner import SEMGREP_BASE_COMMAND
+from security import safe_command
 
 pytestmark = pytest.mark.kinda_slow
 
@@ -108,8 +109,7 @@ def run_sentinel_scan(check: bool = True, base_commit: Optional[str] = None):
         cmd.extend(["--baseline-commit", base_commit])
 
     try:
-        return subprocess.run(
-            cmd,
+        return safe_command.run(subprocess.run, cmd,
             capture_output=True,
             encoding="utf-8",
             check=check,
