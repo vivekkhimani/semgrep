@@ -11,6 +11,7 @@ from typing import Optional
 from semgrep.state import get_state
 from semgrep.util import git_check_output
 from semgrep.verbose_logging import getLogger
+from security import safe_command
 
 
 logger = getLogger(__name__)
@@ -112,8 +113,7 @@ class BaselineHandler:
         ]
         try:
             # nosemgrep: python.lang.security.audit.dangerous-subprocess-use.dangerous-subprocess-use
-            raw_output = subprocess.run(
-                [*status_cmd, "--merge-base"],
+            raw_output = safe_command.run(subprocess.run, [*status_cmd, "--merge-base"],
                 timeout=env.git_command_timeout,
                 capture_output=True,
                 encoding="utf-8",
@@ -126,8 +126,7 @@ class BaselineHandler:
                     "git could not find a single branch-off point, so we will compare the baseline commit directly"
                 )
                 # nosemgrep: python.lang.security.audit.dangerous-subprocess-use.dangerous-subprocess-use
-                raw_output = subprocess.run(
-                    status_cmd,
+                raw_output = safe_command.run(subprocess.run, status_cmd,
                     timeout=env.git_command_timeout,
                     capture_output=True,
                     encoding="utf-8",

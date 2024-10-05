@@ -2,10 +2,11 @@ import subprocess
 from pathlib import Path
 from typing import Optional
 from typing import Union
+from security import safe_command
 
 # Run command and propagate errors
 def cmd(*args: str) -> None:
-    subprocess.run(args, check=True)  # nosem
+    safe_command.run(subprocess.run, args, check=True)  # nosem
 
 
 CORPUS_LOCATION = "bench"
