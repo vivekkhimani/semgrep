@@ -10,6 +10,7 @@ import requests
 from ruamel import yaml
 
 from semgrep.semgrep_types import LANGUAGE
+from security import safe_command
 
 
 SEMGREP_DEV_TIMEOUT_S = 30.0
@@ -86,12 +87,12 @@ def compare(start: str, end: str, snippet: str, use_podman: bool) -> int:
         click.secho(f"===== RUNNING WITH VERSION {start} =====\n", fg="blue", bold=True)
         # The following rule shouldn't be running on Semgrep, it's an FP factory
         # nosemgrep: python.lang.security.audit.dangerous-subprocess-use.dangerous-subprocess-use
-        subprocess.run(docker_cmd(use_podman, td, start))
+        safe_command.run(subprocess.run, docker_cmd(use_podman, td, start))
         click.secho(
             f"\n\n===== RUNNING WITH VERSION {end} =====\n", fg="blue", bold=True
         )
         # nosemgrep: python.lang.security.audit.dangerous-subprocess-use.dangerous-subprocess-use
-        subprocess.run(docker_cmd(use_podman, td, end))
+        safe_command.run(subprocess.run, docker_cmd(use_podman, td, end))
 
     return 0
 

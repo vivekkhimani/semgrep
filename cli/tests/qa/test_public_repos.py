@@ -14,6 +14,7 @@ import pytest
 from ..conftest import TESTS_PATH
 from ..semgrep_runner import SEMGREP_BASE_COMMAND
 from .public_repos import REPOS
+from security import safe_command
 
 # Some improbable string that was implanted in test targets [how?] [why?].
 #
@@ -67,7 +68,7 @@ def assert_sentinel_results(repo_path, sentinel_path, language):
     ]
 
     # nosemgrep: python.lang.security.audit.dangerous-subprocess-use.dangerous-subprocess-use
-    semgrep_run = subprocess.run(cmd, capture_output=True, encoding="utf-8")
+    semgrep_run = safe_command.run(subprocess.run, cmd, capture_output=True, encoding="utf-8")
     assert semgrep_run.returncode == 0
 
     output = json.loads(semgrep_run.stdout)
@@ -174,7 +175,7 @@ def test_semgrep_on_repo(monkeypatch, tmp_path, repo):
     print(f"semgrep command: {cmd}")
 
     # nosemgrep: python.lang.security.audit.dangerous-subprocess-use.dangerous-subprocess-use
-    res = subprocess.run(cmd, encoding="utf-8", capture_output=True)
+    res = safe_command.run(subprocess.run, cmd, encoding="utf-8", capture_output=True)
     print("--- semgrep error output ---")
     print(res.stderr)
     print("----------------------------")

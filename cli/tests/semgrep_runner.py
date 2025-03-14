@@ -15,6 +15,7 @@ from typing import Sequence
 from typing import Union
 
 from click.testing import CliRunner
+from security import safe_command
 
 
 def parse_env_bool(var_name: str, var_val: str) -> bool:
@@ -111,7 +112,7 @@ def invoke_osemgrep(
     if env:
         env_dict = env
     full_env = dict(os.environ, **env_dict)
-    proc = Popen(argv, stdout=PIPE, stderr=PIPE, env=full_env)
+    proc = safe_command.run(Popen, argv, stdout=PIPE, stderr=PIPE, env=full_env)
     stdout, stderr = proc.communicate()
     return Result(proc.returncode, stdout.decode("utf-8"), stderr.decode("utf-8"))
 
