@@ -1,9 +1,9 @@
-from random import sample
 from typing import Any
 
 import pytest
 from src.semgrep.config_resolver import get_config
 from src.semgrep.exclude_rules import filter_exclude_rule
+import secrets
 
 MAX_RULES_TO_EXCLUDE = 10
 
@@ -17,7 +17,7 @@ def test_parse_exclude_rules_auto() -> None:
         project_url="git@github.com/returntocorp/semgrep",
     )
     all_rules = configs_obj.get_rules(False)
-    rule_excluded: Any = map(lambda r: r.id, sample(all_rules, MAX_RULES_TO_EXCLUDE))
+    rule_excluded: Any = map(lambda r: r.id, secrets.SystemRandom().sample(all_rules, MAX_RULES_TO_EXCLUDE))
 
     all_rules = filter_exclude_rule(all_rules, rule_excluded)
 
