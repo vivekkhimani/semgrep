@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from semgrep.semgrep_main import invoke_semgrep
+from security import safe_command
 
 
 # When calling osemgrep, stderr isn't available via this 'capsys' object,
@@ -39,8 +40,7 @@ def test_api_via_cli(unique_home_dir, run_semgrep_in_tmp):
     # Assign env var for settings.yaml to the per-test unique home directory
     # so it doesn't use the default (~/.semgrep/settings.yaml)
     env["SEMGREP_SETTINGS_FILE"] = str(unique_home_dir / ".semgrep/settings.yaml")
-    x = subprocess.run(
-        [
+    x = safe_command.run(subprocess.run, [
             sys.executable,
             "-c",
             "from semgrep.semgrep_main import invoke_semgrep; from pathlib import Path; invoke_semgrep(Path('rules/eqeq.yaml'),[Path('targets/bad/invalid_python.py'), Path('targets/basic/stupid.py')],)",

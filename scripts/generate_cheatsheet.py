@@ -49,6 +49,7 @@ from typing import Optional
 from typing import Tuple
 
 from ruamel.yaml import YAML
+from security import safe_command
 
 yaml = YAML()
 
@@ -223,8 +224,7 @@ def run_semgrep_on_example(
         config.flush()
         cmd = ["semgrep", "--strict", "--json", f"--config={config.name}", code_path]
         print(">>> " + " ".join(cmd))
-        output = subprocess.run(  # nosemgrep: python.lang.security.audit.dangerous-subprocess-use.dangerous-subprocess-use
-            cmd,
+        output = safe_command.run(subprocess.run, cmd,
             capture_output=True,
         )
         if output.returncode == 0:

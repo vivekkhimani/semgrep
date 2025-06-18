@@ -6,6 +6,7 @@ import sys
 import venv
 from pathlib import Path
 from typing import Optional
+from security import safe_command
 
 logger = logging.getLogger(__file__)
 logger.setLevel(logging.INFO)
@@ -78,7 +79,7 @@ def run_semgrep_version(
     real_semgrep_version = r.stdout.decode("utf-8")
     logger.info(f"Using semgrep version {real_semgrep_version}")
 
-    subprocess.run(["./run-benchmarks"] + script_arguments)  # nosemgrep
+    safe_command.run(subprocess.run, ["./run-benchmarks"] + script_arguments)  # nosemgrep
 
     deactivate(oldenv)
 

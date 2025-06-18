@@ -11,6 +11,7 @@ from tests.semgrep_runner import SEMGREP_BASE_COMMAND
 from tests.semgrep_runner import SEMGREP_BASE_COMMAND_STR
 
 from semgrep.constants import OutputFormat
+from security import safe_command
 
 
 def _mask_times(result_json: str) -> str:
@@ -160,8 +161,7 @@ def test_terminal_output_quiet(run_semgrep_in_tmp, snapshot):
 def test_stdin_input(snapshot):
     settings_file = tempfile.NamedTemporaryFile().name
     Path(settings_file).write_text("has_shown_metrics_notification: true")
-    process = subprocess.Popen(
-        SEMGREP_BASE_COMMAND + ["--json", "-e", "a", "--lang", "js", "-"],
+    process = safe_command.run(subprocess.Popen, SEMGREP_BASE_COMMAND + ["--json", "-e", "a", "--lang", "js", "-"],
         encoding="utf-8",
         env={
             **os.environ,
@@ -524,8 +524,7 @@ def test_stack_size(run_semgrep_in_tmp, snapshot):
     # overflow. If this fails, the test is broken and needs to be fixed.
     # Do not just delete this assertion. It means the actual test below does
     # not accurately verify that we are solving the stack exhaustion
-    output = subprocess.run(
-        f"ulimit -s 1000 && {SEMGREP_BASE_COMMAND_STR} --disable-version-check --metrics off --config {rulepath} --verbose {targetpath}",
+    output = safe_command.run(subprocess.run, f"ulimit -s 1000 && {SEMGREP_BASE_COMMAND_STR} --disable-version-check --metrics off --config {rulepath} --verbose {targetpath}",
         shell=True,
         capture_output=True,
         encoding="utf-8",
@@ -537,8 +536,7 @@ def test_stack_size(run_semgrep_in_tmp, snapshot):
     )
 
     # If only set soft limit, semgrep should raise it as necessary so we don't hit soft limit
-    output = subprocess.run(
-        f"ulimit -S -s 1000 && {SEMGREP_BASE_COMMAND_STR} --disable-version-check --metrics off --config {rulepath} --verbose {targetpath}",
+    output = safe_command.run(subprocess.run, f"ulimit -S -s 1000 && {SEMGREP_BASE_COMMAND_STR} --disable-version-check --metrics off --config {rulepath} --verbose {targetpath}",
         shell=True,
         capture_output=True,
         encoding="utf-8",
