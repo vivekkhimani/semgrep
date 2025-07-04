@@ -3,6 +3,7 @@ from pytest_mock import MockerFixture
 
 from semgrep.error import FATAL_EXIT_CODE
 from semgrep.error_handler import ErrorHandler
+from security import safe_requests
 
 
 FAKE_TOKEN = "abc123"
@@ -150,11 +151,10 @@ def test_send_timeout_success(error_handler, mocker) -> None:
     Check that no network does not cause failures and zero exit code is returned
     """
     mocker.patch("socket.getaddrinfo", side_effect=NetworkBlockedInTests)
-    import requests
 
     # verify that network is blocked
     with pytest.raises(NetworkBlockedInTests):
-        _ = requests.get("https://semgrep.dev", timeout=2)
+        _ = safe_requests.get("https://semgrep.dev", timeout=2)
 
     error_handler.configure(suppress_errors=True)
     exit_code = error_handler.send(FATAL_EXIT_CODE)

@@ -8,6 +8,7 @@ from semgrep.config_resolver import Config
 from semgrep.metrics import Metrics
 from semgrep.metrics import MetricsState
 from semgrep.profiling import ProfilingData
+from security import safe_requests
 
 pytestmark = pytest.mark.freeze_time("2017-03-03")
 
@@ -112,11 +113,10 @@ def test_send(metrics, mocker) -> None:
     Check that no network does not cause failures
     """
     mocker.patch("socket.socket", side_effect=NetworkBlockedInTests)
-    import requests
 
     # verify that network is blocked
     with pytest.raises(NetworkBlockedInTests):
-        _ = requests.get("https://semgrep.dev", timeout=2)
+        _ = safe_requests.get("https://semgrep.dev", timeout=2)
 
     metrics.configure(MetricsState.ON, None)
     metrics.send()
