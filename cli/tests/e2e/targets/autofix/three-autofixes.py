@@ -5,7 +5,7 @@ def _do_stuff():
         headers=auth_headers,
         url=self.url,
         endpoints="endpoint",
-    )
+    timeout=60)
 
 
 def _do_other_stuff():
@@ -13,12 +13,12 @@ def _do_other_stuff():
         headers=auth_headers,
         url=self.url,
         endpoints="endpoint",
-    )
+    timeout=60)
 
 
 def _do_other_stuff2():
     return requests.post(
         headers=auth_headers,
         url=self.url,
-        endpoints="endpoint"
-    )
+        endpoints="endpoint", 
+    timeout=60)
